@@ -1,5 +1,5 @@
 /**
- * Cleo-Herramientas - High Performance Application Controller & PWA Manager
+ * Cleo Herramientas - High Performance Application Controller & PWA Manager
  * Capable of processing up to 500+ photos concurrently with 0% browser lag.
  */
 
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Register Service Worker for PWA & Offline Support
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('✅ Service Worker Cleo-Herramientas activo:', reg.scope))
+      .then(reg => console.log('✅ Service Worker Cleo Herramientas activo:', reg.scope))
       .catch(err => console.log('SW fallback:', err));
   }
 
@@ -211,7 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('dragenter', (e) => {
     e.preventDefault();
     dragCounter++;
-    dropZone.classList.add('drag-over');
+    if (!document.body.classList.contains('tool-video') && !document.body.classList.contains('tool-scraper')) {
+      dropZone.classList.add('drag-over');
+    }
   }, false);
 
   window.addEventListener('dragover', (e) => {
@@ -261,6 +263,13 @@ document.addEventListener('DOMContentLoaded', () => {
       Array.from(dt.files).forEach(f => {
         if (isImageFile(f)) files.push(f);
       });
+    }
+
+    if (document.body.classList.contains('tool-video')) {
+      if (window.CleoVideo && dt.files && dt.files.length > 0) {
+        window.CleoVideo.addFiles(dt.files);
+      }
+      return;
     }
 
     if (files.length > 0) {
@@ -556,6 +565,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
 
     updateUI();
+
+    // Si se agregaron fotos adicionales durante el procesamiento, comprimirlas automáticamente
+    if (state.settings.autoCompress && state.items.some(it => it.status === 'pending')) {
+      startCompressionBatch();
+    }
   }
 
   // Clear all or selected
@@ -664,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 15000);
     } catch (err) {
       alert('Error al generar archivo ZIP: ' + err.message);
     } finally {
@@ -1159,6 +1173,23 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   window.addEventListener('keydown', (e) => {
+    // Escape siempre cierra modales abiertos
+    if (e.key === 'Escape') {
+      if (compareModal) compareModal.style.display = 'none';
+      if (proToolsModal) proToolsModal.style.display = 'none';
+      if (shortcutsModal) shortcutsModal.style.display = 'none';
+      if (installGuideModal) installGuideModal.style.display = 'none';
+      return;
+    }
+
+    // Evitar disparar atajos globales mientras el usuario escribe en un campo de texto
+    const isEditing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable);
+    if (isEditing) return;
+
+    // Los atajos de fotos solo actúan si estamos en la pestaña de Fotos
+    const isPhotos = !document.body.classList.contains('tool-video') && !document.body.classList.contains('tool-scraper');
+    if (!isPhotos) return;
+
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
       e.preventDefault();
       fileInput.click();
@@ -1170,12 +1201,10 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         btnDownloadZip.click();
       }
-    } else if (e.key === 'Escape') {
-      if (compareModal) compareModal.style.display = 'none';
-      if (proToolsModal) proToolsModal.style.display = 'none';
-      if (shortcutsModal) shortcutsModal.style.display = 'none';
-      if (installGuideModal) installGuideModal.style.display = 'none';
     }
   });
+
+  // API mínima para otras herramientas (p. ej. el extractor web envía aquí sus imágenes).
+  window.CleoPhotos = { addFiles };
 
 });

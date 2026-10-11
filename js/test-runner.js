@@ -24,7 +24,7 @@ window.runOptiPicTests = async function(count = 10) {
     // Draw patterns and text
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 72px sans-serif';
-    ctx.fillText(`Foto de Prueba #${i} - Cleo-Herramientas`, 100, 200);
+    ctx.fillText(`Foto de Prueba #${i} - Cleo Herramientas`, 100, 200);
     ctx.font = '40px sans-serif';
     ctx.fillText(`Resolución: 1920x1080 | Calidad Original Alta`, 100, 280);
 

@@ -1,5 +1,5 @@
 /**
- * Cleo-Herramientas - High Throughput Multi-threaded Image Compression Engine
+ * Cleo Herramientas - High Throughput Multi-threaded Image Compression Engine
  * Supports up to 500+ images concurrently without freezing UI
  */
 
@@ -33,6 +33,18 @@ class TurboCompressor {
     let targetWidth = origWidth;
     let targetHeight = origHeight;
 
+    const fitMax = (max) => {
+      if (origWidth > max || origHeight > max) {
+        if (origWidth >= origHeight) {
+          targetWidth = max;
+          targetHeight = Math.round((origHeight * max) / origWidth);
+        } else {
+          targetHeight = max;
+          targetWidth = Math.round((origWidth * max) / origHeight);
+        }
+      }
+    };
+
     switch (resizeMode) {
       case 'scale_75':
         targetWidth = Math.round(origWidth * 0.75);
@@ -43,22 +55,13 @@ class TurboCompressor {
         targetHeight = Math.round(origHeight * 0.5);
         break;
       case 'max_1920':
-        if (origWidth > 1920) {
-          targetWidth = 1920;
-          targetHeight = Math.round((origHeight * 1920) / origWidth);
-        }
+        fitMax(1920);
         break;
       case 'max_1280':
-        if (origWidth > 1280) {
-          targetWidth = 1280;
-          targetHeight = Math.round((origHeight * 1280) / origWidth);
-        }
+        fitMax(1280);
         break;
       case 'max_800':
-        if (origWidth > 800) {
-          targetWidth = 800;
-          targetHeight = Math.round((origHeight * 800) / origWidth);
-        }
+        fitMax(800);
         break;
       case 'original':
       default:

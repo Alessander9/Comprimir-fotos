@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cleo-Herramientas - Compresor Inteligente de Fotos</title>
-  <meta name="description" content="Cleo-Herramientas: Comprime y optimiza hasta 500 fotos simultáneamente en tu navegador. Ultra rápido, privado, con Web Workers y sin pérdida perceptible de calidad.">
+  <title>Cleo Herramientas - Compresor de Fotos y Videos</title>
+  <meta name="description" content="Cleo Herramientas: Comprime y optimiza hasta 500 fotos y tus videos (MP4, MOV, WebM, MKV) directamente en tu navegador. Ultra rápido, privado y sin pérdida perceptible de calidad.">
   
   <!-- PWA & Mobile Meta Tags -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#07090e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Cleo-Herramientas">
+  <meta name="apple-mobile-web-app-title" content="Cleo Herramientas">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="icon" type="image/png" href="icons/favicon.png">
 
@@ -35,13 +35,13 @@
     <!-- TOP NAVIGATION BAR -->
     <header class="navbar">
       <div class="nav-brand">
-        <img src="icons/logo.png" alt="Cleo-Herramientas" class="brand-avatar">
+        <img src="icons/logo.png" alt="Cleo Herramientas" class="brand-avatar">
         <div class="brand-headings">
           <div class="brand-title-row">
             <span class="brand-name">Cleo</span>
             <span class="brand-badge-pill">HERRAMIENTAS</span>
           </div>
-          <span class="brand-tagline">Compresor de Fotos Multi-hilo</span>
+          <span class="brand-tagline">Compresor de Fotos y Videos</span>
         </div>
       </div>
 
@@ -92,8 +92,34 @@
     <!-- MAIN BODY -->
     <main class="main-content">
 
+      <!-- TOOL SWITCHER: Fotos | Video -->
+      <nav class="tool-tabs" role="tablist" aria-label="Herramientas de Cleo">
+        <button class="tool-tab active" id="tabPhotos" type="button" role="tab" aria-selected="true" data-tool="photos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="m21 15-5-5L5 21"/>
+          </svg>
+          <span>Fotos</span>
+        </button>
+        <button class="tool-tab" id="tabVideo" type="button" role="tab" aria-selected="false" data-tool="video">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="14" height="14" rx="2"/>
+            <path d="m22 8-6 4 6 4V8z"/>
+          </svg>
+          <span>Video</span>
+        </button>
+        <button class="tool-tab" id="tabScraper" type="button" role="tab" aria-selected="false" data-tool="scraper">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          <span>Extraer de web</span>
+        </button>
+      </nav>
+
       <!-- INTERACTIVE SMART DROPZONE -->
-      <section class="drop-zone-card" id="dropZone">
+      <section class="drop-zone-card" id="dropZone" data-tool-panel="photos">
         <!-- Background animated beam -->
         <div class="drop-beam"></div>
 
@@ -172,7 +198,7 @@
       </section>
 
       <!-- STREAMLINED CONTROL & STATS DECK -->
-      <section class="control-deck">
+      <section class="control-deck" data-tool-panel="photos">
         
         <!-- Left Options Group -->
         <div class="deck-controls-left">
@@ -261,7 +287,7 @@
       </section>
 
       <!-- DATA GALLERY / TABLE SECTION -->
-      <section class="gallery-section">
+      <section class="gallery-section" data-tool-panel="photos">
         
         <!-- Filter Bar & View Switcher -->
         <div class="gallery-header">
@@ -353,6 +379,485 @@
           </div>
         </div>
 
+      </section>
+
+      <!-- ==================================================================
+           VIDEO COMPRESSOR PANEL
+           ================================================================== -->
+
+      <!-- Aviso de compatibilidad (oculto salvo que el navegador no soporte WebCodecs) -->
+      <div class="video-notice" id="videoUnsupported" data-tool-panel="video" hidden>
+        <strong>Este navegador no puede comprimir video.</strong>
+        <span>La compresión de video se apoya en la API nativa WebCodecs. Abre Cleo Herramientas en Chrome, Edge u Opera actualizados para activarla.</span>
+      </div>
+
+      <!-- VIDEO DROPZONE -->
+      <section class="drop-zone-card" id="videoDropZone" data-tool-panel="video" hidden>
+        <div class="drop-beam"></div>
+
+        <div class="drop-hero-state" id="videoDropEmpty">
+          <div class="mascot-preview-wrap">
+            <img src="icons/logo.png" alt="Cleo Mascot" class="mascot-floating-img">
+            <div class="upload-icon-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <rect x="2" y="5" width="14" height="14" rx="2"/>
+                <path d="m22 8-6 4 6 4V8z"/>
+              </svg>
+            </div>
+          </div>
+
+          <h1 class="drop-hero-title">
+            Suelta tus videos <span class="text-gradient-purple">y adelgázalos sin perder calidad</span>
+          </h1>
+          <p class="drop-hero-desc">
+            Re-codificación <strong>VP9 / AV1 nativa en tu navegador</strong>. El ajuste por defecto conserva el detalle a simple vista y no se sube nada a internet.
+          </p>
+
+          <div class="drop-buttons-row">
+            <button class="btn-primary-glow" id="btnBrowseVideos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Explorar Videos
+            </button>
+
+            <button class="btn-secondary-glass" id="btnBrowseVideoFolder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              Cargar Carpeta
+            </button>
+          </div>
+
+          <div class="drop-features-badges">
+            <div class="feature-tag"><span class="check-icon">✓</span> MP4, MOV, WebM, MKV, AVI</div>
+            <div class="feature-tag"><span class="check-icon">✓</span> Procesado 100% local</div>
+            <div class="feature-tag"><span class="check-icon">✓</span> Audio Opus conservado</div>
+          </div>
+        </div>
+
+        <!-- Compact Drop Strip (visible cuando ya hay videos en cola) -->
+        <div class="drop-strip-compact" id="videoDropStrip" style="display: none;">
+          <div class="compact-left-info">
+            <div class="pulse-upload-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </div>
+            <span>Suelta más videos aquí para añadirlos a la cola</span>
+          </div>
+          <div class="compact-btn-group">
+            <button class="btn-compact-add" id="btnVideoCompactAdd">+ Añadir videos</button>
+            <button class="btn-compact-add" id="btnVideoCompactFolder">📁 Carpeta</button>
+          </div>
+        </div>
+
+        <input type="file" id="videoInput" multiple accept="video/*,.mp4,.m4v,.mov,.webm,.mkv,.avi,.wmv,.flv,.3gp" style="display: none;">
+        <input type="file" id="videoFolderInput" webkitdirectory directory multiple style="display: none;">
+      </section>
+
+      <!-- VIDEO CONTROL DECK -->
+      <section class="control-deck" id="videoControlDeck" data-tool-panel="video" hidden>
+
+        <div class="deck-controls-left">
+
+          <!-- Codec Selector Pill Group -->
+          <div class="deck-group">
+            <label class="deck-label">Códec:</label>
+            <div class="format-pill-group" id="videoCodecGroup">
+              <button class="pill-btn active" data-codec="auto" title="Elige el mejor códec disponible (VP9)">Auto</button>
+              <button class="pill-btn" data-codec="vp9" title="Compatibilidad y compresión equilibradas">VP9</button>
+              <button class="pill-btn" data-codec="av1" title="El menor peso del archivo (más lento en equipos antiguos)">AV1</button>
+              <button class="pill-btn" data-codec="vp8" title="El más compatible y rápido">VP8</button>
+            </div>
+          </div>
+
+          <!-- Quality Slider -->
+          <div class="deck-group quality-deck-group">
+            <div class="deck-label-row">
+              <label class="deck-label">Calidad:</label>
+              <span class="quality-display-badge" id="videoQualityBadge">Sin pérdida visible</span>
+            </div>
+            <div class="slider-track-wrap">
+              <input type="range" id="videoQualitySlider" min="0" max="4" step="1" value="4" class="deck-slider" title="Menos compresión (derecha) = más calidad">
+            </div>
+          </div>
+
+          <!-- Resolution Preset -->
+          <div class="deck-group">
+            <label class="deck-label">Resolución:</label>
+            <select id="videoResolution" class="deck-select">
+              <option value="original" selected>Original 100%</option>
+              <option value="1080">Máx 1080p (FHD)</option>
+              <option value="720">Máx 720p (HD)</option>
+              <option value="480">Máx 480p (SD)</option>
+              <option value="360">Máx 360p (Móvil)</option>
+            </select>
+          </div>
+
+          <!-- Audio Handling -->
+          <div class="deck-group">
+            <label class="deck-label">Audio:</label>
+            <select id="videoAudio" class="deck-select">
+              <option value="keep" selected>Conservar tal cual</option>
+              <option value="96">Comprimir a 96 kbps</option>
+              <option value="64">Comprimir a 64 kbps</option>
+              <option value="128">Comprimir a 128 kbps</option>
+              <option value="drop">Quitar audio</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="deck-controls-right">
+
+          <div class="deck-stats-capsule">
+            <div class="stat-count-chip">
+              <span class="dot-purple"></span>
+              <span id="videoStatCount">0 videos</span>
+            </div>
+
+            <div class="stat-weight-chip">
+              <span id="videoStatOriginalSize" class="text-muted">0 B</span>
+              <span class="arrow-sym">→</span>
+              <span id="videoStatOptimizedSize" class="text-cyan font-bold">0 B</span>
+              <span class="badge-saving-pill" id="videoStatSaving">0%</span>
+            </div>
+          </div>
+
+          <div class="deck-btn-group">
+            <button class="btn-deck-compress" id="btnCompressVideos" disabled>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+              <span>Comprimir Videos</span>
+            </button>
+
+            <button class="btn-deck-clear" id="btnClearVideos" title="Vaciar lista" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- VIDEO QUEUE / LIST SECTION -->
+      <section class="gallery-section" id="videoGallerySection" data-tool-panel="video" hidden>
+
+        <div class="gallery-header">
+          <div class="gallery-header-title">
+            <h2>Cola de videos</h2>
+            <span class="video-engine-badge" id="videoEngineBadge">Detectando motor…</span>
+          </div>
+          <div class="gallery-header-hint">Cada video se descarga por separado, ya comprimido en formato WebM.</div>
+        </div>
+
+        <!-- Aviso cuando el original ya estaba tan optimizado que no se reduce -->
+        <div class="video-hint" id="videoNoGainHint" hidden>
+          <span id="videoNoGainText">Algún video ya venía tan optimizado que no se ha reducido nada.</span>
+          <button class="btn-secondary-glass" id="btnLowerVideoQuality">Probar con calidad «Alta»</button>
+        </div>
+
+        <div class="view-container table-view">
+          <table class="cleo-table" id="videosTable">
+            <thead>
+              <tr>
+                <th class="th-num">#</th>
+                <th class="th-thumb">Vista</th>
+                <th class="th-name">Nombre y datos</th>
+                <th class="th-orig">Original</th>
+                <th class="th-opt">Comprimido</th>
+                <th class="th-saving">Ahorro</th>
+                <th class="th-status">Estado</th>
+                <th class="th-actions">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="videoTableBody">
+              <!-- Se rellena dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="empty-state-wrap" id="videoEmptyState">
+          <div class="empty-cat-badge">
+            <img src="icons/logo.png" alt="Cleo" class="empty-mascot-img">
+          </div>
+          <h3>Ningún video añadido aún</h3>
+          <p>Suelta un MP4, MOV o WebM arriba para empezar a reducir su peso.</p>
+        </div>
+
+        <div class="batch-progress-deck" id="videoProgressContainer" style="display: none;">
+          <div class="progress-meta">
+            <span class="progress-title-text" id="videoProgressText">Comprimiendo videos…</span>
+            <span class="progress-percent-text" id="videoProgressPercent">0%</span>
+          </div>
+          <div class="progress-outer-track">
+            <div class="progress-fill-beam" id="videoProgressFill" style="width: 0%;"></div>
+          </div>
+          <div class="video-progress-actions">
+            <button class="btn-secondary-glass" id="btnCancelVideo" hidden>Cancelar</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================================================================
+           EXTRACTOR DE IMÁGENES DE SITIOS WEB
+           ================================================================ -->
+      <section class="drop-zone-card scr-hero" id="scraperHero" data-tool-panel="scraper" hidden>
+        <div class="drop-beam"></div>
+
+        <div class="scr-hero-inner">
+          <div class="scr-hero-head">
+            <div class="scr-hero-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="drop-hero-title scr-title">
+                Extrae todas las imágenes <span class="text-gradient-purple">de cualquier sitio web</span>
+              </h2>
+              <p class="drop-hero-desc">
+                Pega un enlace y Cleo recorrerá las páginas del sitio buscando fotos, fondos CSS, íconos e imágenes de redes sociales.
+              </p>
+            </div>
+          </div>
+
+          <form class="scr-form" id="scraperForm" autocomplete="off" novalidate>
+            <label class="scr-url-field" for="scraperUrlInput">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              <input type="url" id="scraperUrlInput" inputmode="url" spellcheck="false"
+                     placeholder="https://ejemplo.com" aria-label="Enlace del sitio web a escanear">
+            </label>
+            <button type="submit" class="btn-primary-glow scr-btn-scan" id="btnScrapeStart">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="11" cy="11" r="7"/>
+                <path d="m21 21-4.3-4.3"/>
+              </svg>
+              <span>Escanear sitio</span>
+            </button>
+          </form>
+
+          <div class="scr-options">
+            <label class="scr-option">
+              <span class="scr-option-label">Páginas a recorrer</span>
+              <select class="deck-select" id="scraperMaxPages">
+                <option value="1">Solo esta página</option>
+                <option value="10">Hasta 10 páginas</option>
+                <option value="30">Hasta 30 páginas</option>
+                <option value="75">Hasta 75 páginas</option>
+                <option value="150" selected>Hasta 150 páginas</option>
+                <option value="300">Hasta 300 páginas (Catálogo)</option>
+                <option value="500">Hasta 500 páginas (Tienda completa)</option>
+              </select>
+            </label>
+            <label class="scr-switch" title="Extrae el texto completo, títulos (h1-h6), párrafos, contexto y orden cronológico">
+              <input type="checkbox" id="scraperExtractText" checked>
+              <span class="scr-switch-track"></span>
+              <span>Extraer texto y contexto</span>
+            </label>
+            <label class="scr-switch" title="Prioriza tiendas (/tienda/), catálogos y fichas de producto (/producto/) omitiendo páginas de carrito, pago o login">
+              <input type="checkbox" id="scraperPrioritizeShop" checked>
+              <span class="scr-switch-track"></span>
+              <span>Priorizar tienda y productos</span>
+            </label>
+            <label class="scr-switch" title="Descubre automáticamente todos los productos del sitemap.xml del sitio (ej: WooCommerce, Shopify, etc.)">
+              <input type="checkbox" id="scraperUseSitemap" checked>
+              <span class="scr-switch-track"></span>
+              <span>Usar sitemap.xml</span>
+            </label>
+            <label class="scr-switch" title="Conserva la versión de mayor calidad y omite las miniaturas repetidas generadas por WordPress o el CMS">
+              <input type="checkbox" id="scraperDedupe" checked>
+              <span class="scr-switch-track"></span>
+              <span>Omitir miniaturas repetidas</span>
+            </label>
+            <label class="scr-switch">
+              <input type="checkbox" id="scraperIncludeCss" checked>
+              <span class="scr-switch-track"></span>
+              <span>Fondos en CSS</span>
+            </label>
+            <label class="scr-switch">
+              <input type="checkbox" id="scraperHideSmall" checked>
+              <span class="scr-switch-track"></span>
+              <span>Ocultar íconos pequeños</span>
+            </label>
+            <label class="scr-option" style="flex: 1; min-width: 220px;" title="Opcional: Si escribes por ejemplo '/tienda, /producto', solo se escanearán URLs que contengan esas palabras">
+              <span class="scr-option-label">Filtrar rutas (opcional)</span>
+              <input type="text" class="deck-input-text" id="scraperPathFilter" placeholder="ej: /tienda, /producto (o vacío para todo)" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 0.8rem; width: 100%;">
+            </label>
+          </div>
+
+          <div class="scr-error" id="scraperError" role="alert" hidden></div>
+
+          <!-- Progreso del escaneo -->
+          <div class="scr-progress" id="scraperProgress" hidden>
+            <div class="scr-progress-top">
+              <div class="scr-progress-status">
+                <span class="spinner-ring" id="scraperSpinner"></span>
+                <span id="scraperStatusText">Preparando escaneo…</span>
+              </div>
+              <button type="button" class="btn-secondary-glass scr-btn-cancel" id="btnScrapeCancel">Detener</button>
+            </div>
+            <div class="progress-outer-track">
+              <div class="progress-fill-beam" id="scraperProgressFill" style="width: 0%;"></div>
+            </div>
+            <div class="scr-progress-stats">
+              <span><strong id="scraperPagesDone">0</strong> páginas escaneadas</span>
+              <span><strong id="scraperImagesFound">0</strong> imágenes encontradas</span>
+              <span class="scr-current-url" id="scraperCurrentUrl"></span>
+            </div>
+          </div>
+
+          <p class="scr-legal">Descarga solo imágenes que tengas derecho a usar. Algunos sitios bloquean la descarga o cargan sus imágenes con JavaScript.</p>
+        </div>
+      </section>
+
+      <section class="gallery-section scr-results" id="scraperResults" data-tool-panel="scraper" hidden>
+        <div class="gallery-header scr-results-header">
+          <div class="gallery-header-title">
+            <h2 id="scraperResultsTitle">Imágenes y Datos</h2>
+            <span class="video-engine-badge" id="scraperCountText">0</span>
+          </div>
+
+          <div class="scr-header-center">
+            <!-- Selector de modo de vista: Imágenes vs Texto/Contexto -->
+            <div class="scr-view-pills" role="tablist" aria-label="Modo de visualización de resultados">
+              <button class="scr-view-pill active" id="btnScraperViewGrid" type="button" role="tab" aria-selected="true" data-mode="grid">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                  <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span>Imágenes</span>
+              </button>
+              <button class="scr-view-pill" id="btnScraperViewText" type="button" role="tab" aria-selected="false" data-mode="text">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                  <line x1="10" y1="9" x2="8" y2="9"/>
+                </svg>
+                <span>Texto y Contexto</span>
+                <span class="scr-pill-count" id="scraperPagesBadge" style="display: none;">0</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="scr-header-actions">
+            <!-- Botones de exportación de datos -->
+            <button class="btn-secondary-glass scr-btn-sm" id="btnScraperExportJson" disabled title="Exportar metadatos, datos estructurados (Schema.org), contenido en orden y contexto de imágenes en JSON">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+              </svg>
+              <span>Exportar JSON</span>
+            </button>
+            <button class="btn-secondary-glass scr-btn-sm" id="btnScraperExportMd" disabled title="Descargar documento completo estructurado en formato Markdown (.md) respetando el orden">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+              <span>Exportar Markdown</span>
+            </button>
+
+            <!-- Acciones de imágenes -->
+            <button class="btn-secondary-glass scr-btn-sm" id="btnScraperSendToCompressor" disabled title="Enviar las imágenes seleccionadas a la pestaña Fotos para comprimirlas">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <span>Comprimir fotos</span>
+            </button>
+            <button class="btn-secondary-glass scr-btn-sm" id="btnScraperDownloadSelected" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span id="scraperSelectedLabel">Descargar selección</span>
+            </button>
+            <button class="btn-primary-glow scr-btn-sm" id="btnScraperDownloadAll" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span>Descargar fotos (ZIP)</span>
+            </button>
+            <button class="btn-deck-clear" id="btnScraperClear" title="Vaciar resultados" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de progreso para descargas y exportaciones -->
+        <div class="batch-progress-deck scr-action-progress" id="scraperZipProgress" hidden>
+          <div class="progress-meta">
+            <span class="progress-title-text" id="scraperZipText">Preparando descarga…</span>
+            <span class="progress-percent-text" id="scraperZipPercent">0%</span>
+          </div>
+          <div class="progress-outer-track">
+            <div class="progress-fill-beam" id="scraperZipFill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Barra de herramientas para Imágenes -->
+        <div class="scr-toolbar" id="scraperImagesToolbar">
+          <label class="scr-select-all">
+            <input type="checkbox" id="scraperSelectAll" class="cleo-chk">
+            <span>Seleccionar todo</span>
+          </label>
+          <div class="tab-filters scr-type-filters" id="scraperTypeFilters" role="group" aria-label="Filtrar por formato"></div>
+          <div class="scr-toolbar-right">
+            <select class="deck-select scr-sort" id="scraperSort" aria-label="Ordenar imágenes">
+              <option value="found">Orden de aparición</option>
+              <option value="largest">Más grandes primero</option>
+              <option value="name">Nombre (A-Z)</option>
+            </select>
+            <div class="search-field">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="search" id="scraperSearch" placeholder="Buscar por nombre o URL…">
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de herramientas para Texto y Contexto -->
+        <div class="scr-toolbar scr-text-toolbar" id="scraperTextToolbar" style="display: none;">
+          <div class="scr-text-toolbar-left">
+            <label class="scr-page-picker-label">
+              <span>Página:</span>
+              <select class="deck-select scr-page-select" id="scraperPageSelect" aria-label="Seleccionar página escaneada"></select>
+            </label>
+            <span class="scr-text-stats-pill" id="scraperTextStatsPill">0 bloques de lectura</span>
+          </div>
+          <div class="scr-toolbar-right">
+            <div class="search-field">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="search" id="scraperTextSearch" placeholder="Buscar texto, títulos o contexto…">
+            </div>
+          </div>
+        </div>
+
+        <div class="view-container scr-view">
+          <!-- Vista 1: Cuadrícula de Imágenes -->
+          <div class="scr-grid" id="scraperGrid"></div>
+
+          <!-- Vista 2: Documento de Texto, Orden y Contexto -->
+          <div class="scr-text-view" id="scraperTextView" style="display: none;"></div>
+
+          <div class="empty-state-wrap" id="scraperEmpty">
+            <div class="empty-cat-badge">
+              <img src="icons/logo.png" alt="Cleo" class="empty-mascot-img">
+            </div>
+            <h3 id="scraperEmptyTitle">Aún no has escaneado ningún sitio</h3>
+            <p id="scraperEmptyText">Pega un enlace arriba y pulsa «Escanear sitio» para extraer aquí sus imágenes, texto, orden y datos.</p>
+          </div>
+        </div>
       </section>
 
     </main>
@@ -499,13 +1004,13 @@
       <div class="modal-title-bar">
         <div style="display: flex; align-items: center; gap: 10px;">
           <img src="icons/logo.png" alt="Cleo" class="modal-avatar-mini">
-          <h3>Instalar Cleo-Herramientas</h3>
+          <h3>Instalar Cleo Herramientas</h3>
         </div>
         <button class="modal-close-icon" id="btnInstallGuideClose">&times;</button>
       </div>
       <div class="modal-content-body">
         <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
-          Instala Cleo-Herramientas como app nativa en tu escritorio o celular para usarla sin conexión:
+          Instala Cleo Herramientas como app nativa en tu escritorio o celular para usarla sin conexión:
         </p>
 
         <div class="install-steps-list">
@@ -547,9 +1052,78 @@
     </div>
   </div>
 
+  <!-- VIDEO COMPARISON MODAL (Antes vs Después) -->
+  <div class="modal-backdrop" id="videoCompareModal" style="display: none;">
+    <div class="modal-window compare-window">
+      <div class="modal-title-bar">
+        <div class="modal-title-info">
+          <h3>Comparar calidad del video</h3>
+          <span class="modal-sub">Reproduce ambos archivos y comprueba tú mismo la diferencia</span>
+        </div>
+        <button class="modal-close-icon" id="btnVideoCompareClose">&times;</button>
+      </div>
+
+      <div class="modal-content-viewer">
+        <div class="video-compare-grid">
+          <div class="video-compare-cell">
+            <span class="video-compare-tag">Original · <span id="videoCompareOrigSize">0 B</span></span>
+            <video id="videoCompareOrig" controls playsinline preload="metadata"></video>
+          </div>
+          <div class="video-compare-cell">
+            <span class="video-compare-tag is-opt">Comprimido · <span id="videoCompareOptSize">0 B</span>
+              <span class="badge-saving-pill" id="videoCompareSaving">0%</span></span>
+            <video id="videoCompareOpt" controls playsinline preload="metadata"></video>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-bottom-bar">
+        <button class="btn-primary-glow" id="btnVideoCompareDownload">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Descargar Video Comprimido
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRAPER IMAGE PREVIEW MODAL -->
+  <div class="modal-backdrop" id="scraperPreviewModal" style="display: none;">
+    <div class="modal-window compare-window">
+      <div class="modal-title-bar">
+        <div class="modal-title-info">
+          <h3 id="scraperPreviewName">Imagen</h3>
+          <span class="modal-sub" id="scraperPreviewMeta"></span>
+        </div>
+        <button class="modal-close-icon" id="btnScraperPreviewClose">&times;</button>
+      </div>
+      <div class="modal-content-viewer scr-preview-viewer">
+        <img id="scraperPreviewImg" alt="Vista previa" referrerpolicy="no-referrer">
+      </div>
+      <!-- Contexto y metadatos de la imagen extraída -->
+      <div class="scr-preview-context-panel" id="scraperPreviewContext"></div>
+      <div class="modal-bottom-bar scr-preview-bar">
+        <a class="btn-secondary-glass" id="scraperPreviewOpen" href="#" target="_blank" rel="noopener noreferrer">Abrir original</a>
+        <button class="btn-primary-glow" id="btnScraperPreviewDownload">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Descargar imagen
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="js/compressor.js"></script>
   <script src="js/test-runner.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/video.js"></script>
+  <script src="js/scraper.js"></script>
 </body>
 </html>

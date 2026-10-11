@@ -1,15 +1,15 @@
 {
   "id": "cleo-herramientas-app",
-  "name": "Cleo-Herramientas - Compresor de Fotos",
-  "short_name": "Cleo-Herramientas",
-  "description": "Cleo-Herramientas: Comprime y optimiza hasta 500 fotos simultáneamente 100% offline y privado.",
+  "name": "Cleo Herramientas - Compresor de Fotos y Videos",
+  "short_name": "Cleo Herramientas",
+  "description": "Cleo Herramientas: Comprime y optimiza hasta 500 fotos y tus videos (MP4, MOV, WebM) directamente en tu navegador, 100% offline y privado.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#07090e",
   "theme_color": "#07090e",
   "orientation": "any",
-  "categories": ["utilities", "productivity", "photo"],
+  "categories": ["utilities", "productivity", "photo", "video"],
   "icons": [
     {
       "src": "icons/icon-192.png",

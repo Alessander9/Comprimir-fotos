@@ -1,4 +1,4 @@
-name: Deploy Cleo-Herramientas to GitHub Pages
+name: Deploy Cleo Herramientas to GitHub Pages
 
 on:
   push:

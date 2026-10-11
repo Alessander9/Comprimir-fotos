@@ -1,8 +1,8 @@
 /**
- * Cleo-Herramientas - Service Worker (Offline Support & PWA Cache)
+ * Cleo Herramientas - Service Worker (Offline Support & PWA Cache)
  */
 
-const CACHE_NAME = 'cleo-herramientas-v2.6';
+const CACHE_NAME = 'cleo-herramientas-v2.9';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -11,11 +11,15 @@ const ASSETS_TO_CACHE = [
   './js/compressor.js',
   './js/app.js',
   './js/test-runner.js',
+  './js/video.js',
+  './js/scraper.js',
   './icons/logo.png',
   './icons/favicon.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+  // Motor de compresión de video (WebCodecs): se descarga solo al abrir la pestaña Video.
+  'https://cdn.jsdelivr.net/npm/mediabunny@1.61.3/dist/bundles/mediabunny.min.mjs',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap'
 ];
 
@@ -23,7 +27,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Precaching Cleo-Herramientas app shell...');
+      console.log('[Service Worker] Precaching Cleo Herramientas app shell...');
       return cache.addAll(ASSETS_TO_CACHE).catch(err => {
         console.warn('[Service Worker] Non-critical cache error:', err);
       });
@@ -51,6 +55,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   if (!event.request.url.startsWith('http')) return;
+  // No almacenar en caché llamadas a la API o al proxy
+  if (event.request.url.includes('/api/')) return;
 
   event.respondWith(
     fetch(event.request).then((networkResponse) => {
