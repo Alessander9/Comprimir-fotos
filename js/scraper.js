@@ -83,7 +83,21 @@
       textSearch: $('scraperTextSearch'),
       textView: $('scraperTextView'),
       prioritizeShop: $('scraperPrioritizeShop'),
-      pathFilter: $('scraperPathFilter')
+      pathFilter: $('scraperPathFilter'),
+      // Nuevos controles de Redes Sociales, Pegar URLs y Bookmarklet
+      engineSelect: $('scraperEngineSelect'),
+      btnOpenPasteModal: $('btnOpenPasteModal'),
+      btnOpenBookmarkletModal: $('btnOpenBookmarkletModal'),
+      pasteUrlsModal: $('pasteUrlsModal'),
+      btnPasteUrlsClose: $('btnPasteUrlsClose'),
+      btnPasteUrlsCancel: $('btnPasteUrlsCancel'),
+      btnPasteUrlsSubmit: $('btnPasteUrlsSubmit'),
+      pasteUrlsTextarea: $('pasteUrlsTextarea'),
+      pasteUrlsCount: $('pasteUrlsCount'),
+      bookmarkletModal: $('bookmarkletModal'),
+      btnBookmarkletClose: $('btnBookmarkletClose'),
+      btnBookmarkletDismiss: $('btnBookmarkletDismiss'),
+      cleoBookmarkletLink: $('cleoBookmarkletLink')
     };
 
     if (!els.hero || !els.form) return;
@@ -1058,6 +1072,110 @@
       els.statusText.textContent = `Escaneando página ${Math.min(scan.processed + 1, total)} de ${total}…`;
     }
 
+    async function startSocialScan(startUrl, scan) {
+      els.statusText.textContent = 'Conectando con motor de Redes Sociales (gallery-dl)...';
+      els.pagesDone.textContent = '1';
+      els.progressFill.style.width = '30%';
+
+      try {
+        const streamUrl = `/api/social-extract?url=${encodeURIComponent(startUrl)}&stream=1`;
+        const res = await fetch(streamUrl, { signal: scan.ctrl.signal });
+        if (!res.ok) {
+          throw new Error(`Error en el servidor (${res.status})`);
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(trimmed.slice(6));
+                if (data.type === 'image' && data.url) {
+                  let hostname = 'red social';
+                  try { hostname = new URL(startUrl).hostname; } catch (e) {}
+                  addImage(data.url, data.url, 'social', startUrl, 'Foto de ' + hostname);
+                  els.imagesFound.textContent = String(state.items.length);
+                  els.statusText.textContent = `Descubriendo fotos en alta calidad... (${state.items.length} encontradas)`;
+                  scheduleRender();
+                } else if (data.type === 'error') {
+                  showError(`Aviso: ${data.error}`);
+                }
+              } catch (e) { /* ignore parse */ }
+            }
+          }
+        }
+        scan.pagesOk = 1;
+      } catch (err) {
+        if (!scan.ctrl.signal.aborted) {
+          showError(`Extracción de redes: ${err.message}. Puedes usar también el botón "📋 Pegar URLs" o "⭐ Marcador para Redes".`);
+        }
+      } finally {
+        finishScan(scan);
+      }
+    }
+
+    async function startBrowserScan(startUrl, scan) {
+      els.statusText.textContent = 'Iniciando navegador headless (Puppeteer con scroll automático)...';
+      els.pagesDone.textContent = '1';
+      els.progressFill.style.width = '30%';
+
+      try {
+        const streamUrl = `/api/browser-extract?url=${encodeURIComponent(startUrl)}&stream=1&scrolls=12`;
+        const res = await fetch(streamUrl, { signal: scan.ctrl.signal });
+        if (!res.ok) {
+          throw new Error(`Error en el servidor (${res.status})`);
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(trimmed.slice(6));
+                if (data.type === 'image' && data.url) {
+                  addImage(data.url, data.url, 'browser', startUrl, 'Foto renderizada');
+                  els.imagesFound.textContent = String(state.items.length);
+                  els.statusText.textContent = `Renderizando y haciendo scroll... (${state.items.length} encontradas)`;
+                  scheduleRender();
+                } else if (data.type === 'error') {
+                  showError(`Aviso: ${data.error}`);
+                }
+              } catch (e) { /* ignore parse */ }
+            }
+          }
+        }
+        scan.pagesOk = 1;
+      } catch (err) {
+        if (!scan.ctrl.signal.aborted) {
+          showError(`Error en el navegador headless: ${err.message}`);
+        }
+      } finally {
+        finishScan(scan);
+      }
+    }
+
     async function startScan() {
       if (state.scan) return;
       const startUrl = normalizeInputUrl(els.input.value);
@@ -1105,6 +1223,22 @@
       els.progressFill.style.width = '0%';
       els.pagesDone.textContent = '0';
       els.imagesFound.textContent = '0';
+
+      const engine = els.engineSelect ? els.engineSelect.value : 'auto';
+      let isSocial = false;
+      try {
+        isSocial = /facebook\.com|fb\.watch|instagram\.com|threads\.net|tiktok\.com|pinterest\.com|twitter\.com|x\.com|reddit\.com/i.test(new URL(startUrl).hostname);
+      } catch (e) {}
+
+      if (engine === 'social' || (engine === 'auto' && isSocial)) {
+        await startSocialScan(startUrl, scan);
+        return;
+      }
+
+      if (engine === 'browser') {
+        await startBrowserScan(startUrl, scan);
+        return;
+      }
 
       enqueuePage(scan, startUrl);
       if (!scan.shopQueue.length && !scan.queue.length) scan.queue.push(startUrl);
@@ -2288,7 +2422,11 @@
       if (state.previewItem) downloadOne(state.previewItem, els.btnPreviewDownload);
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && els.previewModal.style.display === 'flex') closePreview();
+      if (e.key === 'Escape') {
+        if (els.previewModal && els.previewModal.style.display === 'flex') closePreview();
+        if (els.pasteUrlsModal && els.pasteUrlsModal.style.display === 'flex') els.pasteUrlsModal.style.display = 'none';
+        if (els.bookmarkletModal && els.bookmarkletModal.style.display === 'flex') els.bookmarkletModal.style.display = 'none';
+      }
     });
 
     if (els.tab) {
@@ -2296,6 +2434,122 @@
         if (!els.input.value && !state.scan) setTimeout(() => els.input.focus(), 50);
       });
     }
+
+    /* ------------------------------------------------------------------ *
+     * Modal: Pegar URLs en Lote
+     * ------------------------------------------------------------------ */
+    if (els.btnOpenPasteModal && els.pasteUrlsModal) {
+      const openPasteModal = () => {
+        els.pasteUrlsModal.style.display = 'flex';
+        if (els.pasteUrlsTextarea) {
+          els.pasteUrlsTextarea.value = '';
+          if (els.pasteUrlsCount) els.pasteUrlsCount.textContent = '0 enlaces detectados';
+          setTimeout(() => els.pasteUrlsTextarea.focus(), 50);
+        }
+      };
+
+      const closePasteModal = () => {
+        els.pasteUrlsModal.style.display = 'none';
+      };
+
+      els.btnOpenPasteModal.addEventListener('click', openPasteModal);
+      if (els.btnPasteUrlsClose) els.btnPasteUrlsClose.addEventListener('click', closePasteModal);
+      if (els.btnPasteUrlsCancel) els.btnPasteUrlsCancel.addEventListener('click', closePasteModal);
+      els.pasteUrlsModal.addEventListener('click', (e) => {
+        if (e.target === els.pasteUrlsModal) closePasteModal();
+      });
+
+      function parsePasteUrls(text) {
+        if (!text) return [];
+        const lines = text.split(/[\r\n,]+/)
+          .map(s => s.trim().replace(/^['"]+|['"]+$/g, ''))
+          .filter(s => /^https?:\/\//i.test(s));
+        return Array.from(new Set(lines));
+      }
+
+      if (els.pasteUrlsTextarea) {
+        els.pasteUrlsTextarea.addEventListener('input', () => {
+          const urls = parsePasteUrls(els.pasteUrlsTextarea.value);
+          if (els.pasteUrlsCount) {
+            els.pasteUrlsCount.textContent = `${urls.length} ${urls.length === 1 ? 'enlace detectado' : 'enlaces detectados'}`;
+          }
+        });
+      }
+
+      if (els.btnPasteUrlsSubmit) {
+        els.btnPasteUrlsSubmit.addEventListener('click', () => {
+          const urls = parsePasteUrls(els.pasteUrlsTextarea.value);
+          if (!urls.length) {
+            alert('Por favor pega al menos un enlace válido que comience con http:// o https://');
+            return;
+          }
+          clearResults();
+          urls.forEach((u) => {
+            addImage(u, u, 'import', 'Importado manualmente', 'Foto importada');
+          });
+          state.hasScanned = true;
+          closePasteModal();
+          scheduleRender(true);
+          toast(`✅ ¡${urls.length} fotos importadas con éxito!`, 'ok');
+        });
+      }
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Modal: Marcador de 1-Clic (Bookmarklet)
+     * ------------------------------------------------------------------ */
+    if (els.btnOpenBookmarkletModal && els.bookmarkletModal) {
+      const currentOrigin = window.location.origin;
+      const bookmarkletCode = "javascript:(function(){var imgs=Array.from(document.querySelectorAll('img')).map(function(i){return i.currentSrc||i.src||i.getAttribute('data-src')||i.getAttribute('data-lazy-src')||i.getAttribute('data-original');}).filter(function(s){return s&&/^https?:\\/\\//i.test(s)&&!s.includes('rsrc.php')&&!s.includes('emoji.php');});var unique=Array.from(new Set(imgs));if(!unique.length){alert('No se encontraron imágenes en esta vista. Haz scroll e intenta de nuevo.');return;}var target='" + currentOrigin + "/?import_urls='+encodeURIComponent(JSON.stringify(unique));window.open(target,'_blank');})();";
+
+      if (els.cleoBookmarkletLink) {
+        els.cleoBookmarkletLink.setAttribute('href', bookmarkletCode);
+        els.cleoBookmarkletLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          alert('Arrastra este botón a tu barra de marcadores (Ctrl+Shift+B en Chrome/Edge si no la ves).');
+        });
+      }
+
+      const openBookmarkletModal = () => {
+        els.bookmarkletModal.style.display = 'flex';
+      };
+
+      const closeBookmarkletModal = () => {
+        els.bookmarkletModal.style.display = 'none';
+      };
+
+      els.btnOpenBookmarkletModal.addEventListener('click', openBookmarkletModal);
+      if (els.btnBookmarkletClose) els.btnBookmarkletClose.addEventListener('click', closeBookmarkletModal);
+      if (els.btnBookmarkletDismiss) els.btnBookmarkletDismiss.addEventListener('click', closeBookmarkletModal);
+      els.bookmarkletModal.addEventListener('click', (e) => {
+        if (e.target === els.bookmarkletModal) closeBookmarkletModal();
+      });
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Receptor de URLs del Marcador (?import_urls=...)
+     * ------------------------------------------------------------------ */
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const rawImport = searchParams.get('import_urls');
+      if (rawImport) {
+        const urls = JSON.parse(rawImport);
+        if (Array.isArray(urls) && urls.length > 0) {
+          setTimeout(() => {
+            const scraperTabBtn = document.querySelector('[data-tab="scraper"]');
+            if (scraperTabBtn) scraperTabBtn.click();
+            clearResults();
+            urls.forEach((u) => {
+              addImage(u, u, 'bookmarklet', 'Marcador de navegador', 'Foto capturada');
+            });
+            state.hasScanned = true;
+            scheduleRender(true);
+            toast(`📸 ¡${urls.length} fotos importadas desde el marcador!`, 'ok');
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }, 350);
+        }
+      }
+    } catch (e) { /* ignore parse */ }
 
     render();
 

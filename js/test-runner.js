@@ -1,10 +1,10 @@
 /**
- * OptiPic TURBO - Automated Test Runner
+ * Cleo Herramientas - Automated Test Runner
  * Generates test images and validates all compression modes, sliders, formats, and ZIP creation
  */
 
-window.runOptiPicTests = async function(count = 10) {
-  console.log(`🚀 Iniciando Test Automatizado de OptiPic TURBO con ${count} fotos de prueba...`);
+window.runCleoTests = window.runOptiPicTests = async function(count = 10) {
+  console.log(`🚀 Iniciando Test Automatizado de Cleo Herramientas con ${count} fotos de prueba...`);
   
   const testFiles = [];
   const canvas = document.createElement('canvas');

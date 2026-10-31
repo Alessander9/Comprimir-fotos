@@ -1,0 +1,24 @@
+{
+  "name": "cleo-herramientas",
+  "version": "1.0.0",
+  "description": "Cleo Herramientas - Extractor y Compresor de Fotos y Videos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alessander9/Comprimir-fotos.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Alessander9/Comprimir-fotos/issues"
+  },
+  "homepage": "https://github.com/Alessander9/Comprimir-fotos#readme",
+  "dependencies": {
+    "puppeteer": "^25.16.0"
+  }
+}

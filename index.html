@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cleo Herramientas - Compresor de Fotos y Videos</title>
+  <title>Cleo Herramientas</title>
   <meta name="description" content="Cleo Herramientas: Comprime y optimiza hasta 500 fotos y tus videos (MP4, MOV, WebM, MKV) directamente en tu navegador. Ultra rápido, privado y sin pérdida perceptible de calidad.">
   
   <!-- PWA & Mobile Meta Tags -->
@@ -623,11 +623,31 @@
             </div>
             <div>
               <h2 class="drop-hero-title scr-title">
-                Extrae todas las imágenes <span class="text-gradient-purple">de cualquier sitio web</span>
+                Extrae todas las imágenes <span class="text-gradient-purple">de cualquier sitio web o red social</span>
               </h2>
               <p class="drop-hero-desc">
-                Pega un enlace y Cleo recorrerá las páginas del sitio buscando fotos, fondos CSS, íconos e imágenes de redes sociales.
+                Pega un enlace de cualquier web, o de <strong>Facebook, Instagram, etc.</strong> Cleo extraerá todas las fotos en alta resolución con scroll automático y sesiones locales.
               </p>
+            </div>
+          </div>
+
+          <div class="scr-quick-actions" style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn-secondary-glass scr-btn-sm" id="btnOpenPasteModal" title="Pegar URLs directas en lote">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+              <span>📋 Pegar URLs en lote</span>
+            </button>
+            <button type="button" class="btn-secondary-glass scr-btn-sm" id="btnOpenBookmarkletModal" title="Marcador de 1 clic para Facebook e Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>⭐ Marcador para Redes</span>
+            </button>
+            <div style="margin-left: auto; display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Motor:</span>
+              <select class="deck-select" id="scraperEngineSelect" style="padding: 4px 8px; font-size: 0.8rem;">
+                <option value="auto">⚡ Automático (Detecta web / redes)</option>
+                <option value="social">📸 Redes Sociales (Facebook / IG - gallery-dl)</option>
+                <option value="browser">🌐 Navegador Headless (Puppeteer SPA)</option>
+                <option value="standard">📄 Estándar (CORS Proxy / HTML)</option>
+              </select>
             </div>
           </div>
 
@@ -638,7 +658,7 @@
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
               </svg>
               <input type="url" id="scraperUrlInput" inputmode="url" spellcheck="false"
-                     placeholder="https://ejemplo.com" aria-label="Enlace del sitio web a escanear">
+                     placeholder="https://facebook.com/pagina/photos o https://ejemplo.com" aria-label="Enlace del sitio web o red social a escanear">
             </label>
             <button type="submit" class="btn-primary-glow scr-btn-scan" id="btnScrapeStart">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -1115,6 +1135,65 @@
           </svg>
           Descargar imagen
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRAPER PASTE URLS MODAL -->
+  <div class="modal-backdrop" id="pasteUrlsModal" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-title-bar">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h3>📋 Pegar enlaces de fotos en lote</h3>
+        </div>
+        <button class="modal-close-icon" id="btnPasteUrlsClose">&times;</button>
+      </div>
+      <div class="modal-content-body">
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 12px;">
+          Pega aquí los enlaces directos de imágenes (uno por línea o separados por comas). Se añadirán directamente a la cuadrícula de Cleo.
+        </p>
+        <textarea id="pasteUrlsTextarea" rows="8" placeholder="https://ejemplo.com/foto1.jpg&#10;https://ejemplo.com/foto2.jpg" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.4); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; color: #fff; font-family: monospace; font-size: 0.85rem; resize: vertical;"></textarea>
+        <div style="margin-top: 8px; font-size: 0.8rem; color: var(--text-secondary); display: flex; justify-content: space-between;">
+          <span id="pasteUrlsCount">0 enlaces detectados</span>
+        </div>
+      </div>
+      <div class="modal-bottom-bar" style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button type="button" class="btn-secondary-glass" id="btnPasteUrlsCancel">Cancelar</button>
+        <button type="button" class="btn-primary-glow" id="btnPasteUrlsSubmit">Cargar en la cuadrícula</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRAPER BOOKMARKLET MODAL -->
+  <div class="modal-backdrop" id="bookmarkletModal" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-title-bar">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h3>⭐ Marcador de 1-Clic para Redes Sociales</h3>
+        </div>
+        <button class="modal-close-icon" id="btnBookmarkletClose">&times;</button>
+      </div>
+      <div class="modal-content-body">
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 14px;">
+          Arrastra este botón a tu barra de marcadores del navegador. Cuando estés en cualquier página de Facebook, Instagram o web de clientes:
+        </p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a id="cleoBookmarkletLink" class="btn-primary-glow" style="display: inline-block; padding: 12px 24px; text-decoration: none; cursor: move;" href="#">
+            📸 Extraer a Cleo
+          </a>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px;">
+            (Haz clic y arrástralo hacia tu barra de favoritos de Chrome/Edge)
+          </div>
+        </div>
+        <ol style="font-size: 0.85rem; color: var(--text-secondary); padding-left: 20px; line-height: 1.6;">
+          <li>Abre la página o fanpage en tu navegador (ej: Facebook o Instagram).</li>
+          <li>Haz un poco de scroll para que aparezcan las fotos que necesitas.</li>
+          <li>Pulsa el marcador <strong>📸 Extraer a Cleo</strong>.</li>
+          <li>Las fotos se enviarán automáticamente a esta ventana de Cleo Herramientas.</li>
+        </ol>
+      </div>
+      <div class="modal-bottom-bar">
+        <button type="button" class="btn-secondary-glass" id="btnBookmarkletDismiss" style="width: 100%;">Cerrar</button>
       </div>
     </div>
   </div>

@@ -102,7 +102,7 @@ async function readLimited(response) {
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Type, X-Final-Url, X-Cleo-Proxy');
   res.setHeader('X-Cleo-Proxy', '1');
 
@@ -110,7 +110,7 @@ module.exports = async function handler(req, res) {
     res.statusCode = 204;
     return res.end();
   }
-  if (req.method !== 'GET') {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.statusCode = 405;
     return res.end('Método no permitido');
   }

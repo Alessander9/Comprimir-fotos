@@ -1,6 +1,6 @@
 {
   "id": "cleo-herramientas-app",
-  "name": "Cleo Herramientas - Compresor de Fotos y Videos",
+  "name": "Cleo Herramientas",
   "short_name": "Cleo Herramientas",
   "description": "Cleo Herramientas: Comprime y optimiza hasta 500 fotos y tus videos (MP4, MOV, WebM) directamente en tu navegador, 100% offline y privado.",
   "start_url": "./",
